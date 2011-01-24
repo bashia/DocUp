@@ -1,4 +1,5 @@
-# /usr/bin/env python
+# !/usr/bin/env python
+
 # m2h.py- a script that uses Markdown to make HTML 4 files from plaintext
 # files in Markdown format and zip them up for uploading to pypi.
 #
@@ -14,8 +15,8 @@ import sys
 import os
 
 def readargs():				# readargs gets all the command-line
-	if (len(sys.argv) < 2):		# arguments and returns them in a list
-		print "Usage: m2h [FILE1,FILE2,...]"	# More command-line args
+	if (len(sys.argv) < 3):		# arguments and returns them in a list
+		print "Usage: m2h [FILE1,FILE2,...] <archive-name>"	# More command-line args
 	else:						# may be added in the future
 		return sys.argv[1:]
 
@@ -23,7 +24,7 @@ def getfiles():				# getfiles returns a list of the filenames
 	return readargs()[0].split(",")	# given in the command-line arguments
 
 def downmark(filename):		# downmark uses markdown on a file filename
-	cond = ""		# and, with some mild bash and python trickery,
+	cond = ""		# and, with some mild trickery,
 	if (filename[0]=="-"):	# results in an html file with the same name
 		cond = "--"	# minus the original extension plus '.html'
 
@@ -33,22 +34,31 @@ def downmark(filename):		# downmark uses markdown on a file filename
 
 	os.system(formatting)
 
-	return newfilename
+	return newfilename	# downmark returns the name of the new html file for use by other functions
 
 
-def zipup(filename):			# zipup simply uses gzip on a file filename
-	formatted = "gzip " + filename
+def movefile(filename):			# movefile simply moves file filename to /tmp/smoooog for tarballing
+	formatted = "mv " + filename + " /tmp/smoooog"
 
 	os.system(formatted)
 
-def multifile():			# multifile just downmarks and zipups
-	for phile in getfiles():	# all the files named in the list 
-		zipup(downmark(phile))	# returned by getfiles()
+def fileops():				# fileops performs the file and directory movement and deletion
+					# necessary before anything can be tarred
+	os.system("rm -rf /tmp/smoooog")	#Removes any previous smoooogs that might get in the way
+	os.system("mkdir /tmp/smoooog")		
+	for phile in getfiles():		#This moves all the files that downmark has converted to /tmp/smoooog
+		movefile(downmark(phile))
+
+def tarrify():				# tarrify tars /tmp/smoooog's contents into a .tar.gz file named in the
+					# arguments
+	archname = sys.argv[2]
+	targzdir = "tar -pczf " + archname + ".tar.gz" + " -P -C /tmp/smoooog ."
+	os.system(targzdir)
+
+def main():		
+	fileops()
+	tarrify()
 	
-
-def main():
-
-	multifile()
 
 if __name__ == "__main__":
     main()
