@@ -37,27 +37,28 @@ def downmark(filename):		# downmark uses markdown on a file filename
 	return newfilename	# downmark returns the name of the new html file for use by other functions
 
 
-def movefile(filename):			# movefile simply moves file filename to /tmp/smoooog for tarballing
+def movefile(filename):			# movefile simply moves file filename to /tmp/smoooog for zipping
 	formatted = "mv " + filename + " /tmp/smoooog"
 
 	os.system(formatted)
 
 def fileops():				# fileops performs the file and directory movement and deletion
-					# necessary before anything can be tarred
+					# necessary before anything can be zipped
 	os.system("rm -rf /tmp/smoooog")	#Removes any previous smoooogs that might get in the way
 	os.system("mkdir /tmp/smoooog")		
 	for phile in getfiles():		#This moves all the files that downmark has converted to /tmp/smoooog
 		movefile(downmark(phile))
 
-def tarrify():				# tarrify tars /tmp/smoooog's contents into a .tar.gz file named in the
-					# arguments
+def zipify():				# zipify zips /tmp/smoooog's contents into a .zip file named in the
+					# arguments and moves the .zip file to the user's working directory.
 	archname = sys.argv[2]
-	targzdir = "tar -pczf " + archname + ".tar.gz" + " -P -C /tmp/smoooog ."
-	os.system(targzdir)
+	origdir = os.getcwd()
+	zipdir = "cd /tmp/smoooog;" + " zip -r " + archname + " *" + "; mv " + archname + ".zip " + origdir
+	os.system(zipdir)
 
 def main():		
 	fileops()
-	tarrify()
+	zipify()
 	
 
 if __name__ == "__main__":
