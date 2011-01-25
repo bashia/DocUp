@@ -1,4 +1,4 @@
-# !/usr/bin/env python
+#! /usr/bin/env python
 
 # m2h.py- a script that uses Markdown to make HTML 4 files from plaintext
 # files in Markdown format and zip them up for uploading to pypi.
@@ -15,13 +15,17 @@ import sys
 import os
 
 def readargs():				# readargs gets all the command-line
-	if (len(sys.argv) < 3):		# arguments and returns them in a list
+	if (len(sys.argv) < 3):		# arguments and returns them in a list.
 		print "Usage: m2h [FILE1,FILE2,...] <archive-name>"	# More command-line args
-	else:						# may be added in the future
+	else:								# may be added in the future.
 		return sys.argv[1:]
+	
 
 def getfiles():				# getfiles returns a list of the filenames
-	return readargs()[0].split(",")	# given in the command-line arguments
+	try:
+		return readargs()[0].split(",")	# given in the command-line arguments
+	except TypeError:
+		return
 
 def downmark(filename):		# downmark uses markdown on a file filename
 	cond = ""		# and, with some mild trickery,
@@ -45,17 +49,21 @@ def movefile(filename):			# movefile simply moves file filename to /tmp/smoooog 
 def fileops():				# fileops performs the file and directory movement and deletion
 					# necessary before anything can be zipped
 	os.system("rm -rf /tmp/smoooog")	#Removes any previous smoooogs that might get in the way
-	os.system("mkdir /tmp/smoooog")		
-	for phile in getfiles():		#This moves all the files that downmark has converted to /tmp/smoooog
-		movefile(downmark(phile))
+	os.system("mkdir /tmp/smoooog")
+	try:		
+		for phile in getfiles():		#This moves all the files that downmark has converted to /tmp/smoooog
+			movefile(downmark(phile))
+	except TypeError:
+		return
 
 def zipify():				# zipify zips /tmp/smoooog's contents into a .zip file named in the
-					# arguments and moves the .zip file to the user's working directory.
-	archname = sys.argv[2]
-	origdir = os.getcwd()
-	zipdir = "cd /tmp/smoooog;" + " zip -r " + archname + " *" + "; mv " + archname + ".zip " + origdir
-	os.system(zipdir)
-
+	try:				# arguments and moves the .zip file to the user's working directory.
+		archname = sys.argv[2]
+		origdir = os.getcwd()
+		zipdir = "cd /tmp/smoooog;" + " zip -r -q " + archname + " *" + "; mv " + archname + ".zip " + origdir
+		os.system(zipdir)
+	except IndexError:
+		return
 def main():		
 	fileops()
 	zipify()
