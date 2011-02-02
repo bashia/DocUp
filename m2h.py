@@ -13,10 +13,21 @@
 
 import sys
 import os
+import socket
+import zipfile
+import httplib
+import base64
+import urlparse
+import tempfile
+import cStringIO as StringIO
+
+from distutils import log
+#from distutils.command.upload import upload
+from distutils.errors import DistutilsOptionError
 
 def readargs():				# readargs gets all the command-line
 	if (len(sys.argv) < 3):		# arguments and returns them in a list.
-		print "Usage: m2h [FILE1,FILE2,...] <archive-name>"	# More command-line args
+		print "Usage: m2h [FILE1,FILE2,...] <project-name> username:password"	# More command-line args
 	else:								# may be added in the future.
 		return sys.argv[1:]
 	
@@ -62,11 +73,72 @@ def zipify():				# zipify zips /tmp/smoooog's contents into a .zip file named in
 		origdir = os.getcwd()
 		zipdir = "cd /tmp/smoooog;" + " zip -r -q " + archname + " *" + "; mv " + archname + ".zip " + origdir
 		os.system(zipdir)
+		return archname
 	except IndexError:
 		return
-def main():		
+
+def upload_file(filename, username, password): #<-- original: (self, filename)
+	if type(filename) != str:
+		return
+        content = open(filename + ".zip",'rb').read()
+        projname = "m2h"
+        data = {
+            ':action': 'doc_upload',
+            'name': projname,
+            'content': (os.path.basename(filename),content),
+        }
+        # set up the authentication
+        auth = "Basic " + base64.encodestring(username + ":" + password).strip()
+
+        # Build up the MIME payload for the POST data
+        boundary = '--------------GHSKFJDLGDS7543FJKLFHRE75642756743254'
+        sep_boundary = '\n--' + boundary
+        end_boundary = sep_boundary + '--'
+        body = StringIO.StringIO()
+        for key, value in data.items():
+            # handle multiple entries for the same name
+            if type(value) != type([]):
+                value = [value]
+            for value in value:
+                if type(value) is tuple:
+                    fn = ';filename="%s"' % value[0]
+                    value = value[1]
+                else:
+                    fn = ""
+                value = str(value)
+                body.write(sep_boundary)
+                body.write('\nContent-Disposition: form-data; name="%s"'%key)
+                body.write(fn)
+                body.write("\n\n")
+                body.write(value)
+                if value and value[-1] == '\r':
+                    body.write('\n')  # write an extra newline (lurve Macs)
+        body.write(end_boundary)
+        body.write("\n")
+        body = body.getvalue()
+
+        # build the Request
+        http = httplib.HTTPConnection("pypi.python.org")
+
+        data = ''
+        loglevel = log.INFO
+        try:
+            http.connect()
+            http.putrequest("POST", "http://pypi.python.org/pypi")
+            http.putheader('Content-type',
+                           'multipart/form-data; boundary=%s'%boundary)
+            http.putheader('Content-length', str(len(body)))
+            http.putheader('Authorization', auth)
+            http.endheaders()
+            http.send(body)
+        except socket.error, e:
+            return
+
+def main():
+	username = sys.argv[3].split(":")[0]	
+	password = sys.argv[3].split(":")[1]	
 	fileops()
-	zipify()
+	upload_file(zipify(),username,password)
 	
 
 if __name__ == "__main__":
