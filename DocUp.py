@@ -24,13 +24,13 @@ from distutils import log
 from distutils.errors import DistutilsOptionError
 
 def readargs():				# readargs gets all the command-line
-	if (len(sys.argv) < 4):		# arguments and returns them in a list.
+	if (len(sys.argv) != 4):		# arguments and returns them in a list.
 		print "Usage: DocUp [FILE1,FILE2,...] <project-name> username:password"	# More command-line args
 	else:								# may be added in the future.
 		return sys.argv[1:]
 	
 
-def getfiles():				# getfiles returns a list of the filenames
+def getfnames():				# getfnames returns a list of the filenames
 	try:
 		return readargs()[0].split(",")	# given in the command-line arguments
 	except TypeError:
@@ -42,6 +42,9 @@ def downmark(filename):		# downmark uses markdown on a file filename
 		cond = "--"	# minus the original extension plus '.html'
 
 	newfilename = filename.split(".")[0] + ".html"
+
+	if (len(sys.argv[1].split(",")) == 1):
+		newfilename = "index.html"
 
 	formatting = "markdown " + cond + " " + filename + " -o html4" + " >> " + newfilename
 
@@ -57,10 +60,10 @@ def movefile(filename):			# movefile simply moves file filename to /tmp/smoooog 
 
 def fileops():				# fileops performs the file and directory movement and deletion
 					# necessary before anything can be zipped
-	os.system("rm -rf /tmp/smoooog")	#Removes any previous smoooogs that might get in the way
+	os.system("rm -rf /tmp/smoooog")	# Removes any previous smoooogs that might get in the way
 	os.system("mkdir /tmp/smoooog")
 	try:		
-		for phile in getfiles():		#This moves all the files that downmark has converted to /tmp/smoooog
+		for phile in getfnames():		# This moves all the files that downmark has converted to /tmp/smoooog
 			movefile(downmark(phile))
 	except TypeError:
 		return
@@ -78,8 +81,8 @@ def zipify():				# zipify zips /tmp/smoooog's contents into a .zip file named in
 def upload(filename, username, password):		# upload uploads file filename to pypi under 
 	if type(filename) != str:			# project projname as user username with
 		return					# password password.
-        content = open(filename + ".zip",'rb').read()
-        projname = sys.argv[2]
+        content = open(filename + ".zip",'rb').read()	# Thanks to the Sphinx-PyPI-upload project for a lot of this function.
+        projname = sys.argv[2]				# Find them here: http://pypi.python.org/pypi/Sphinx-PyPI-upload/0.2.1
         data = {
             ':action': 'doc_upload',
             'name': projname,
@@ -95,8 +98,8 @@ def upload(filename, username, password):		# upload uploads file filename to pyp
         body = StringIO.StringIO()
         for key, value in data.items():
             # handle multiple entries for the same name
-            if type(value) != type([]):						# I communized the bulk of this function from
-                value = [value]							# Sphinx-PyPI-upload. See license details.
+            if type(value) != type([]):						
+                value = [value]							
             for value in value:
                 if type(value) is tuple:
                     fn = ';filename="%s"' % value[0]
