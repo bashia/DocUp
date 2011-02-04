@@ -28,12 +28,12 @@ Download and compile Python 2.4.3:
 Now we need to install Python setuputils:
 
     $ cd /tmp/src
-    $ wget http://pypi.python.org/packages/2.7/s/setuptools/setuptools-0.6c11-py2.7.egg
+    $ wget http://pypi.python.org/packages/2.4.3/s/setuptools/setuptools-0.6c11-py2.4.3.egg
     $ sudo sh setuptools-0.6c11-py2.7.egg
 
 Now install pip to install the rest of our dependencies:
 
-    $ sudo easy_install-2.7 pip
+    $ sudo easy_install pip
 
 Now we install Markdown:
 
