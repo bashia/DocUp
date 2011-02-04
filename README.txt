@@ -35,32 +35,24 @@ Now install pip to install the rest of our dependencies:
 
     $ sudo easy_install-2.7 pip
 
-And DocUp itself:
+Now we install Markdown:
+
+    $ sudo pip install markdown
+
+Zip should be pre-installed, but to install it on Redhat-derived distros, use:
+
+    $ sudo yum install zip
+
+or
+
+    $ sudo apt-get install zip
+
+on Debian-derived distros.
+
+And now for DocUp itself:
  
     $ sudo pip install DocUp
 
-Now clean everything up:
-
-    $ sudo rm -Rf /tmp/src/
-
-### Other distros:
-
-You can install the Python libraries listed above with pip:
-
-lxml requires libxml2 and libxslt and their development libs to be installed. 
-
-Install pip:
-
-    # easy_install pip
-
-And DocUp and its dependencies:
-
-    # pip install DocUp
-
-## Install without pip
-To install without using pip, run:
-
-    # python setup.py install
 
 ##Syntax
 
