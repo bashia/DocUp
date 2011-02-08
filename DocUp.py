@@ -22,11 +22,18 @@ import cStringIO as StringIO
 from distutils import log
 #from distutils.command.upload import upload
 from distutils.errors import DistutilsOptionError
+from ConfigParser import ConfigParser
 
-def readargs():				# readargs gets all the command-line
-	if (len(sys.argv) != 4):		# arguments and returns them in a list.
-		print "Usage: DocUp [FILE1,FILE2,...] <project-name> username:password"	# More command-line args
-	else:								# may be added in the future.
+def getcreds():
+	config = ConfigParser()
+	config.readfp(open(os.path.expanduser('~/.pypirc')))
+	creds = [config.get('server-login','username'),config.get('server-login','password')]
+	return creds
+
+def readargs():					# readargs gets all the command-line
+	if (len(sys.argv) > 5) or (len(sys.argv) < 3):		# arguments and returns them in a list.
+		print "Usage: DocUp <FILE1>[,FILE2,...] <project-name> [--creds username:password]"	# More command-line args
+	else:											# may be added in the future.
 		return sys.argv[1:]
 	
 
@@ -137,12 +144,19 @@ def upload(filename, username, password):		# upload uploads file filename to pyp
 	
 
 def main():
-	try:
-		username = sys.argv[3].split(":")[0]	# Get user details
-		password = sys.argv[3].split(":")[1]	
-	except IndexError:
-		print "Usage: DocUp [FILE1,FILE2,...] <project-name> username:password"
-		return
+
+	if "--creds" not in sys.argv:
+		try:
+			username,password = getcreds()	# Get user details
+		except IOError:
+			print "No .pypirc file found. Try entering your credentials manually or registering with pypi."
+			return
+	else:
+		try:
+			username,password = sys.argv[4].split(":")
+		except IndexError:
+			print "Usage: DocUp <FILE1>[,FILE2,...] <project-name> [--creds username:password]"
+			return
 	fileops()				# Consolodate files into one zip archive	
 	upload(zipify(),username,password)	# Upload the zip file
 	cleanup = "rm " + sys.argv[2] + ".zip"
