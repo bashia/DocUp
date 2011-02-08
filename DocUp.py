@@ -17,6 +17,7 @@ import socket
 import httplib
 import base64
 import urlparse
+import tempfile
 import cStringIO as StringIO
 
 from distutils import log
@@ -30,52 +31,50 @@ def getcreds():
 	creds = [config.get('server-login','username'),config.get('server-login','password')]
 	return creds
 
-def readargs():					# readargs gets all the command-line
-	if (len(sys.argv) > 5) or (len(sys.argv) < 3):		# arguments and returns them in a list.
+def readargs():						# readargs gets all the command-line
+	if (len(sys.argv) > 5) or (len(sys.argv) < 3):	# arguments and returns them in a list.
 		print "Usage: DocUp <FILE1>[,FILE2,...] <project-name> [--creds username:password]"	# More command-line args
 	else:											# may be added in the future.
 		return sys.argv[1:]
 	
 
-def getfnames():				# getfnames returns a list of the filenames
-	try:
-		return readargs()[0].split(",")	# given in the command-line arguments
+def getfnames():					# getfnames returns a list of the filenames
+	try:						# given in the command-line arguments
+		return readargs()[0].split(",")	
 	except TypeError:
 		return
 
-def downmark(filename):		# downmark uses markdown on a file filename
-	cond = ""		# and, with some mild trickery,
-	if (filename[0]=="-"):	# results in an html file with the same name
-		cond = "--"	# minus the original extension plus '.html'
+def downmark(filename, tempdir):			# downmark uses markdown on a file filename
+	cond = ""					# and puts the results into an html file of
+	if (filename[0]=="-"):				# the same name in the temporary directory
+		cond = "--"
 
 	newfilename = filename.split(".")[0] + ".html"
 
 	if (len(sys.argv[1].split(",")) == 1):
 		newfilename = "index.html"
 
-	formatting = "markdown " + cond + " " + filename + " -o html4" + " >> " + "/tmp/smoooog/" + newfilename
+	formatting = "markdown " + cond + " " + filename + " -o html4" + " >> " + tempdir + "/" + newfilename
 
 	os.system(formatting)
 
-	return newfilename	# downmark returns the name of the new html file for use by other functions
+	return newfilename				# downmark returns the name of the new html file for use by other functions
 
-def fileops():				# fileops performs the file and directory movement and deletion
-					# necessary before anything can be zipped
-	os.system("rm -rf /tmp/smoooog")	# Removes any previous smoooogs that might get in the way
-	os.system("mkdir /tmp/smoooog")
+def fileops(tempdir):					# fileops performs the file and directory movement and deletion
+							# necessary before anything can be zipped
 	try:		
-		for phile in getfnames():		# This moves all the files that downmark has converted to /tmp/smoooog
-			downmark(phile)
+		for phile in getfnames():		# This downmarks all the files in the comma-seperated field in the
+			downmark(phile, tempdir)	# command-line arguments, moving them all to the temp directory
 	except TypeError:
 		return
 
-def zipify():				# zipify zips /tmp/smoooog's contents into a .zip file named in the
-	try:				# arguments and moves the .zip file to the user's working directory.
+def zipify(tempdir):					# zipify zips the temp file's contents into a .zip 
+	try:						# named after the project it is destined for.
 		archname = sys.argv[2]
 		origdir = os.getcwd()
-		zipdir = "cd /tmp/smoooog;" + " zip -r -q " + archname + " *"
+		zipdir = "cd " + tempdir + ";" + " zip -r -q " + archname + " *"
 		os.system(zipdir)
-		return "/tmp/smoooog/" + archname
+		return tempdir + "/" + archname
 	except IndexError:
 		return
 
@@ -139,6 +138,7 @@ def upload(filename, username, password):		# upload uploads file filename to pyp
 
 def main():
 
+	tempdir = tempfile.mkdtemp()			# Make a temporary directory in which to consolidate the html files
 	if "--creds" not in sys.argv:
 		try:
 			username,password = getcreds()	# Get user details
@@ -151,10 +151,10 @@ def main():
 		except IndexError:
 			print "Usage: DocUp <FILE1>[,FILE2,...] <project-name> [--creds username:password]"
 			return
-	fileops()				# Consolodate files into one zip archive	
-	upload(zipify(),username,password)	# Upload the zip file
-	cleanup = "rm -rf " + "/tmp/smoooog"
-	os.system(cleanup)			# Delete the zip archive
+	fileops(tempdir)				# Consolodate files into one zip archive	
+	upload(zipify(tempdir),username,password)	# Upload the zip file
+	cleanup = "rm -rf " + tempdir
+	os.system(cleanup)				# Delete the zip archive
 	
 
 if __name__ == "__main__":
