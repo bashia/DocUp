@@ -53,17 +53,11 @@ def downmark(filename):		# downmark uses markdown on a file filename
 	if (len(sys.argv[1].split(",")) == 1):
 		newfilename = "index.html"
 
-	formatting = "markdown " + cond + " " + filename + " -o html4" + " >> " + newfilename
+	formatting = "markdown " + cond + " " + filename + " -o html4" + " >> " + "/tmp/smoooog/" + newfilename
 
 	os.system(formatting)
 
 	return newfilename	# downmark returns the name of the new html file for use by other functions
-
-
-def movefile(filename):			# movefile simply moves file filename to /tmp/smoooog for zipping
-	formatted = "mv " + filename + " /tmp/smoooog"
-
-	os.system(formatted)
 
 def fileops():				# fileops performs the file and directory movement and deletion
 					# necessary before anything can be zipped
@@ -71,7 +65,7 @@ def fileops():				# fileops performs the file and directory movement and deletio
 	os.system("mkdir /tmp/smoooog")
 	try:		
 		for phile in getfnames():		# This moves all the files that downmark has converted to /tmp/smoooog
-			movefile(downmark(phile))
+			downmark(phile)
 	except TypeError:
 		return
 
@@ -79,9 +73,9 @@ def zipify():				# zipify zips /tmp/smoooog's contents into a .zip file named in
 	try:				# arguments and moves the .zip file to the user's working directory.
 		archname = sys.argv[2]
 		origdir = os.getcwd()
-		zipdir = "cd /tmp/smoooog;" + " zip -r -q " + archname + " *" + "; mv " + archname + ".zip " + origdir
+		zipdir = "cd /tmp/smoooog;" + " zip -r -q " + archname + " *"
 		os.system(zipdir)
-		return archname
+		return "/tmp/smoooog/" + archname
 	except IndexError:
 		return
 
@@ -159,7 +153,7 @@ def main():
 			return
 	fileops()				# Consolodate files into one zip archive	
 	upload(zipify(),username,password)	# Upload the zip file
-	cleanup = "rm " + sys.argv[2] + ".zip"
+	cleanup = "rm -rf " + "/tmp/smoooog"
 	os.system(cleanup)			# Delete the zip archive
 	
 
