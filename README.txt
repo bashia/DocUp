@@ -43,7 +43,7 @@ Zip should be pre-installed, but to install it on Redhat-derived distros, use:
 
     $ sudo yum install zip
 
-or
+or, on Debian-based distros:
 
     $ sudo apt-get install zip
 
