@@ -5,9 +5,6 @@
 #
 # See the Readme for pre-requisites and install info.
 #
-# In the future, support will be added for multiple files and automatic
-# uploading to pypi.
-#
 # Author: Anthony Darius Bashi
 # email: bashia@uvic.ca
 
@@ -37,6 +34,24 @@ def readargs():						# readargs gets all the command-line
 	else:											# may be added in the future.
 		return sys.argv[1:]
 	
+def markdir(target):					# markdir recursively goes through a directory tree
+	for item in os.listdir(target):			# rooted at target, converting any file with a .txt
+		fullpath = target + "/"+ item		# extension to html using markdown and deletes the original
+		if "txt" in item:
+			tohtml = "markdown " + fullpath + " -f " + target + "/" + item.split(".")[0] + ".html -q"
+			os.system(tohtml)
+			cleanup = "rm " + fullpath
+			os.system(cleanup)
+
+		if os.path.isdir(fullpath):
+			markdir(fullpath)
+
+def dirhandle(target, tempdir):				# dirhandle copies the contents of the specified directory into
+	for f in os.listdir(target):			# the temporary directory for zippage and uploading.
+		movement = "cp -r " + target + "/* " + tempdir
+		os.system(movement)
+	markdir(tempdir)
+	return tempdir
 
 def getfnames():					# getfnames returns a list of the filenames
 	try:						# given in the command-line arguments
@@ -151,7 +166,14 @@ def main():
 		except IndexError:
 			print "Usage: DocUp <FILE1>[,FILE2,...] <project-name> [--creds username:password]"
 			return
-	fileops(tempdir)				# Consolodate files into one zip archive	
+	try:
+		if os.path.isdir(getfnames()[0]):		# This allows for directories to be markeddown, with r
+			abspath = os.path.abspath(getfnames()[0])
+			dirhandle(abspath,tempdir)
+		else:
+			fileops(tempdir)			# Consolodate files into one zip archive	
+	except TypeError:
+		return
 	upload(zipify(tempdir),username,password)	# Upload the zip file
 	cleanup = "rm -rf " + tempdir
 	os.system(cleanup)				# Delete the zip archive
