@@ -18,7 +18,6 @@ import tempfile
 import cStringIO as StringIO
 
 from distutils import log
-#from distutils.command.upload import upload
 from distutils.errors import DistutilsOptionError
 from ConfigParser import ConfigParser
 
@@ -79,7 +78,11 @@ def fileops(tempdir):					# fileops performs the file and directory movement and
 							# necessary before anything can be zipped
 	try:		
 		for phile in getfnames():		# This downmarks all the files in the comma-seperated field in the
-			downmark(phile, tempdir)	# command-line arguments, moving them all to the temp directory
+			if phile.split(".")[-1] == "txt":# command-line arguments, moving them all to the temp directory
+				downmark(phile, tempdir)
+			else:
+				copy = "cp " + phile + " " + tempdir
+				os.system(copy)	
 	except TypeError:
 		return
 

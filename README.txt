@@ -56,16 +56,25 @@ And now for DocUp itself:
 
 ##Syntax
 
-In order to upload a file or comma-seperated list of files to PyPI as documentation,
+In order to upload a file, directory, or comma-seperated list of files to PyPI as documentation,
 follow this pattern:
 
-   # ./DocUp.py [FILE1,FILE2,...] <project-name> username:password
+    $ ./DocUp.py <file1[,file2,...]> <project-name> [username:password]
 
-*FILE1,FILE2... is the comma-seperated list of files (don't include the square brackets)
+or
 
-*<project-name> is the project to which the documentation will be uploaded (don't include the brackets)
+    $ ./DocUp.py <directory> <project-name> [username:password]
 
-*username:password is the username and password of the PyPI user under whom you want to post the documentation (include the colon)
+
+*	file1[,file2...] - file1 refers to a single text file that could be uploaded for documentation. Optionally, comma-seperate any more files you would like to add.
+
+*	project-name - The project to which the documentation will be uploaded.
+
+*	username:password - The username and password of the PyPI user under whom you want to post the documentation. (Only required when .pypirc is not present or configured properly.)
+
+*	directory - A directory to be uploaded as documentation.
+
+NOTE: If you want a file converted from markdown to html, make sure it has a .txt extension.
 
 ## License
 
