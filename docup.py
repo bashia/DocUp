@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# DocUp.py- a script that uses Markdown to make HTML 4 files from plaintext
+# docup- a script that uses Markdown to make HTML 4 files from plaintext
 # files in Markdown format and zip them up for uploading to pypi.
 #
 # See the Readme for pre-requisites and install info.
