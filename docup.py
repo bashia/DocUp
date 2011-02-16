@@ -38,7 +38,7 @@ def getcreds():
 
 def readargs():						# readargs gets all the command-line
 	if (len(sys.argv) > 5) or (len(sys.argv) < 3):	# arguments and returns them in a list.
-		print "Usage: DocUp <FILE1>[,FILE2,...] <project-name> [--creds username:password]"	# More command-line args
+		print "Usage: docup <FILE1>[,FILE2,...] <project-name> [--creds username:password]"	# More command-line args
 	else:											# may be added in the future.
 		return sys.argv[1:]
 	
@@ -108,7 +108,7 @@ def zipify(tempdir):					# zipify zips the temp file's contents into a .zip
 		os.system(zipdir)
 		return tempdir + "/" + archname
 	except IndexError:
-		print "Usage: DocUp <FILE1>[,FILE2,...] <project-name> [--creds username:password]"
+		print "Usage: docup <FILE1>[,FILE2,...] <project-name> [--creds username:password]"
 		return
 
 def upload(filename, username, password):		# upload uploads file filename to pypi under 
@@ -177,10 +177,6 @@ def upload(filename, username, password):		# upload uploads file filename to pyp
 		print "Upload failed."
 		return
 
-def confirmsuccess(tempdir,projname):	#This will compare the local index.html and the one on pypi. This is rough- Refine it
-	os.system("curl http://packages.pypi.org/" + projname + "/ >> " + tempdir + "/" + "test.html")
-	
-
 def main():
 
 	tempdir = tempfile.mkdtemp()			# Make a temporary directory in which to consolidate the html files
@@ -194,7 +190,7 @@ def main():
 		try:
 			username,password = sys.argv[4].split(":")
 		except IndexError:
-			print "Usage: DocUp <FILE1>[,FILE2,...] <project-name> [--creds username:password]"
+			print "Usage: docup <FILE1>[,FILE2,...] <project-name> [--creds username:password]"
 			return
 	try:
 		if os.path.isdir(getfnames()[0]):		# This allows for directories to be markeddown
