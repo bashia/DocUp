@@ -9,7 +9,7 @@ setup(name='DocUp',
        "markdown>=2.0.3",
         ],
       author_email='bashia@uvic.ca',
-      version='0.4',
+      version='0.5',
       py_modules=['docup'],
       scripts= ['docup']
       )

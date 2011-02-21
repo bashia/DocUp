@@ -21,8 +21,8 @@ from distutils import log
 from distutils.errors import DistutilsOptionError
 from ConfigParser import ConfigParser
 
-def getcreds():
-	option = ''
+def getcreds():						# getcreds looks in the user's .pypirc file
+	option = ''					# and returns a list containing a user's username and password.
 	if "[pypi]" in open(os.path.expanduser('~/.pypirc')).read():
 		option = 'pypi'
 	if "[server-login]" in open(os.path.expanduser('~/.pypirc')).read():
@@ -80,6 +80,18 @@ def downmark(filename, tempdir):			# downmark uses markdown on a file filename
 	formatting = "markdown " + cond + " " + filename + " -o html4" + " >> " + tempdir + "/" + newfilename
 
 	os.system(formatting)
+
+	top = "<html lang=en>\n<head>\n<meta charset=utf-8>\n<title>" + sys.argv[2] + "- " + filename + "</title>\n</head>\n<body>"
+	bottom = "\n</body>\n</html>"
+	htmlify = open(tempdir + "/" + newfilename,'r+')
+	htmlify.seek(-1,2)
+	htmlify.write(bottom)					# This whole business with the clunky html stuff is to format
+								# the headers in the downmarked files to a 'Projname- filename'
+	htmlify.seek(0)						# format. It makes it easier to read.
+	old = htmlify.read()
+	htmlify.seek(0)
+	htmlify.write("<html lang=en>\n<head>\n<meta charset=utf-8>\n<title>" + sys.argv[2] + "- " + filename + "</title>\n</head>\n<body>" + old)
+	htmlify.close()
 
 	return newfilename				# downmark returns the name of the new html file for use by other functions
 
@@ -173,6 +185,7 @@ def upload(filename, username, password):		# upload uploads file filename to pyp
 			print "Error! You either cannot edit '" + projname + "' or it does not exist.\nCheck your credentials or the project name and try again."
 		if errcode == 401:
 			print "Error! The wrong password was provided to pypi.\nCheck ~/.pypirc or your command-line arguments and try again."
+		print "Uploaded data accessible at: http://packages.python.org/" + projname
 	except socket.error, e:
 		print "Upload failed."
 		return

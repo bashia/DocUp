@@ -35,10 +35,6 @@ Now install pip to install the rest of our dependencies:
 
     $ sudo easy_install pip
 
-Now we install Markdown:
-
-    $ sudo pip install markdown
-
 Zip should be pre-installed, but to install it on Redhat-derived distros, use:
 
     $ sudo yum install zip
@@ -49,7 +45,7 @@ or, on Debian-based distros:
 
 on Debian-derived distros.
 
-And now for DocUp itself:
+And now for DocUp itself(and markdown):
  
     $ sudo pip install DocUp
 
